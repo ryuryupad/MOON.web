@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>MOONコミュニティ</title>
+<style>
+:root{--glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.10);--glass-hover:rgba(255,255,255,0.07);}
+*{margin:0;padding:0;box-sizing:border-box;cursor:default;}
+html{scroll-behavior:smooth;}
+body{background:#080808;color:white;font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP','Hiragino Sans',sans-serif;overflow-x:hidden;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;background-image:linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);background-size:60px 60px;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(255,255,255,.03) 0%,transparent 70%);}
+
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes pulseRing{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.1)}50%{box-shadow:0 0 0 14px rgba(255,255,255,0)}}
+@keyframes adminPulse{0%,100%{opacity:.8}50%{opacity:1}}
+@keyframes logoFlip{0%,42%{opacity:1;transform:translateY(0)}47%{opacity:0;transform:translateY(-6px)}52%{opacity:0;transform:translateY(6px)}57%,100%{opacity:1;transform:translateY(0)}}
+
+.reveal{opacity:0;transform:translateY(34px);}
+.revealed{animation:fadeUp .85s cubic-bezier(.16,1,.3,1) forwards;}
+
+.card{background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.09);transition:all .4s cubic-bezier(.16,1,.3,1);}
+.card:hover{transform:translateY(-4px);background:var(--glass-hover);border-color:rgba(255,255,255,.18);box-shadow:0 24px 48px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.13);}
+.card-admin{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.22);}
+
+.btn-glass{background:rgba(255,255,255,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.17);color:white;border-radius:100px;padding:9px 20px;font-size:12px;letter-spacing:.08em;box-shadow:0 4px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1);transition:all .3s ease;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap;}
+.btn-glass:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.36);transform:translateY(-2px);}
+.btn-white{background:white;color:black;border:none;border-radius:100px;padding:10px 24px;font-size:12px;letter-spacing:.1em;font-weight:700;animation:pulseRing 3s ease-in-out infinite;transition:all .3s cubic-bezier(.16,1,.3,1);cursor:pointer;font-family:inherit;}
+.btn-white:hover{background:rgba(255,255,255,.88);transform:translateY(-2px) scale(1.02);box-shadow:0 12px 40px rgba(255,255,255,.2);}
+
+.shimmer{background:linear-gradient(90deg,#fff 0%,#fff 36%,rgba(255,255,255,.3) 50%,#fff 64%,#fff 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4.5s linear infinite;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.055);}
+.nav-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+
+.logo-wrap{position:relative;height:20px;overflow:hidden;min-width:175px;}
+.logo-a,.logo-b{position:absolute;top:0;left:0;font-size:13px;font-weight:900;letter-spacing:.1em;white-space:nowrap;}
+.logo-a{animation:logoFlip 6s ease-in-out infinite;}
+.logo-b{animation:logoFlip 6s ease-in-out infinite;animation-delay:3s;opacity:0;}
+
+#hero{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:100vh;padding:80px 24px 0;}
+.hero-label{display:flex;align-items:center;justify-content:center;gap:12px;animation:fadeIn 1s ease forwards;opacity:0;animation-delay:.15s;margin-bottom:22px;}
+.hero-line{width:36px;height:1px;background:rgba(255,255,255,.22);}
+.hero-tag{font-size:11px;letter-spacing:.3em;opacity:.38;text-transform:uppercase;}
+.hero-h1{font-size:clamp(50px,11vw,108px);font-weight:900;letter-spacing:-.035em;line-height:1.04;margin-bottom:18px;animation:fadeUp 1s cubic-bezier(.16,1,.3,1) forwards;opacity:0;animation-delay:.3s;}
+.hero-sub{font-size:clamp(13px,1.8vw,16px);opacity:.42;letter-spacing:.07em;margin-bottom:46px;line-height:1.88;animation:fadeUp 1s cubic-bezier(.16,1,.3,1) forwards;opacity:0;animation-delay:.5s;}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;animation:fadeUp 1s cubic-bezier(.16,1,.3,1) forwards;opacity:0;animation-delay:.7s;}
+.scroll-hint{position:absolute;bottom:34px;animation:fadeIn 2s ease forwards;opacity:0;animation-delay:1.3s;}
+.scroll-hint svg{opacity:.22;animation:float 2.3s ease-in-out infinite;}
+
+.sw{padding:64px 24px;max-width:880px;margin:0 auto;}
+.sww{padding:64px 24px;max-width:1100px;margin:0 auto;}
+.sec-label{font-size:11px;letter-spacing:.3em;opacity:.35;margin-bottom:12px;text-transform:uppercase;}
+.sec-title{font-size:clamp(28px,5vw,48px);font-weight:900;letter-spacing:-.03em;}
+.sec-head{text-align:center;margin-bottom:50px;}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:14px;}
+.stat-inner{padding:30px 18px;text-align:center;}
+.stat-num{font-size:clamp(32px,5vw,44px);font-weight:900;letter-spacing:-.03em;margin-bottom:5px;}
+.stat-lbl{font-size:11px;opacity:.35;letter-spacing:.12em;}
+
+.shop-layout{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;}
+.shop-left{flex:1;min-width:230px;}
+.shop-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:7px 16px;border-radius:100px;font-size:12px;letter-spacing:.1em;margin-bottom:20px;}
+.shop-ttl{font-size:clamp(19px,3vw,29px);font-weight:900;letter-spacing:-.02em;margin-bottom:12px;line-height:1.38;}
+.shop-desc{font-size:13px;opacity:.46;line-height:1.92;margin-bottom:22px;}
+.shop-pts{display:flex;flex-direction:column;gap:9px;margin-bottom:28px;}
+.shop-pt{display:flex;align-items:center;gap:10px;}
+.pdw{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pd{width:5px;height:5px;border-radius:50%;background:white;}
+.pt-txt{font-size:13px;opacity:.65;}
+.ratio-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:20px 22px;}
+.ratio-row{display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap;}
+.rdot{width:9px;height:9px;border-radius:50%;}
+.rtxt{font-size:12px;opacity:.72;}
+.rbar-bg{height:7px;border-radius:100px;background:rgba(255,255,255,.09);overflow:hidden;}
+.rbar{height:100%;background:linear-gradient(90deg,rgba(255,255,255,.92),rgba(255,255,255,.48));border-radius:100px;width:0;}
+.shop-circle{width:clamp(105px,17vw,145px);height:clamp(105px,17vw,145px);border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 55px rgba(255,255,255,.04),inset 0 1px 0 rgba(255,255,255,.09);}
+.shop-num{font-size:clamp(30px,5vw,46px);font-weight:900;}
+.shop-sub-lbl{font-size:10px;opacity:.34;letter-spacing:.12em;}
+.shop-right{flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
+.admin-inner{padding:28px;}
+.adm-av-wrap{position:relative;margin-bottom:16px;}
+.adm-av{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;}
+.adm-badge{position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;animation:adminPulse 2.5s ease-in-out infinite;}
+.adm-name{font-size:18px;font-weight:900;margin-bottom:4px;}
+.adm-role-tag{display:inline-block;font-size:10px;letter-spacing:.12em;padding:3px 10px;border-radius:100px;margin-bottom:12px;}
+.adm-desc{font-size:13px;opacity:.52;line-height:1.88;}
+
+.voices-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:12px;}
+.voice-inner{padding:22px;}
+.voice-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.vav{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.vav-n{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);}
+.vav-a{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);}
+.v-name{font-size:13px;font-weight:700;}
+.v-role{font-size:10px;opacity:.35;}
+.v-role-a{opacity:.75;}
+.v-stars{font-size:12px;letter-spacing:1px;margin-bottom:8px;}
+.v-txt{font-size:12px;opacity:.54;line-height:1.88;margin-top:10px;}
+
+.rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+.rule-inner{padding:24px;}
+.rule-num{font-size:28px;font-weight:900;opacity:.12;letter-spacing:-.03em;margin-bottom:8px;}
+.rule-ttl{font-size:15px;font-weight:900;margin-bottom:10px;}
+.rule-items{display:flex;flex-direction:column;gap:8px;}
+.rule-item{display:flex;gap:8px;align-items:flex-start;}
+.rbullet{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.4);flex-shrink:0;margin-top:8px;}
+.rule-txt{font-size:12px;opacity:.55;line-height:1.75;}
+.admin-note{margin-top:24px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:20px 22px;}
+.an-ttl{font-size:12px;letter-spacing:.15em;opacity:.5;margin-bottom:10px;text-transform:uppercase;}
+.an-txt{font-size:13px;opacity:.55;line-height:1.88;}
+
+.faq-list{display:flex;flex-direction:column;gap:10px;}
+.faq-item{border-radius:14px;overflow:hidden;border:1px solid var(--glass-border);background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.faq-q{width:100%;background:none;border:none;color:white;padding:18px 20px;font-size:14px;font-weight:700;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:inherit;cursor:pointer;transition:background .2s;}
+.faq-q:hover{background:rgba(255,255,255,.04);}
+.faq-arr{font-size:12px;opacity:.5;transition:transform .3s;flex-shrink:0;}
+.faq-arr.open{transform:rotate(180deg);}
+.faq-a{font-size:13px;color:rgba(255,255,255,.58);line-height:1.9;padding:0 20px;max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1),padding .3s,opacity .3s;opacity:0;}
+.faq-a.open{max-height:300px;padding:0 20px 18px;opacity:1;}
+
+.bgm-wrap{padding:40px 24px;max-width:700px;margin:0 auto;}
+.bgm-card{padding:24px 28px;}
+.bgm-sec-lbl{font-size:11px;letter-spacing:.25em;opacity:.38;margin-bottom:16px;text-transform:uppercase;}
+.bgm-main-lbl{font-size:14px;font-weight:700;margin-bottom:4px;}
+.bgm-sub-lbl{font-size:11px;opacity:.4;margin-bottom:16px;letter-spacing:.05em;}
+.bgm-tracks{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.bgm-track{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid transparent;cursor:pointer;transition:all .25s;background:rgba(255,255,255,.03);}
+.bgm-track:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);}
+.bgm-track.active{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22);}
+.bgm-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);flex-shrink:0;transition:all .25s;}
+.bgm-track.active .bgm-dot{background:white;}
+.bgm-track-name{font-size:13px;font-weight:600;}
+.bgm-track-sub{font-size:11px;opacity:.42;margin-top:2px;}
+.bgm-player-wrap{border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.1);}
+.bgm-player-wrap iframe{display:block;width:100%;border:none;}
+
+.cta-card{max-width:560px;margin:0 auto;}
+.cta-inner{padding:clamp(34px,6vw,64px) clamp(20px,4vw,50px);text-align:center;}
+.cta-label-txt{font-size:11px;letter-spacing:.3em;opacity:.35;margin-bottom:20px;text-transform:uppercase;}
+.cta-ttl{font-size:clamp(24px,4vw,40px);font-weight:900;letter-spacing:-.03em;margin-bottom:12px;}
+.cta-desc{font-size:13px;opacity:.44;line-height:1.88;margin-bottom:36px;}
+footer{text-align:center;padding:28px;border-top:1px solid rgba(255,255,255,.05);}
+.footer-txt{font-size:11px;opacity:.16;letter-spacing:.1em;}
+#weather-canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:5;}
+@media(max-width:600px){nav{padding:12px 14px;}.nav-right{gap:5px;}.btn-glass{padding:7px 11px;font-size:11px;}.sw,.sww{padding:48px 14px;}}
+</style>
+</head>
+<body>
+<canvas id="weather-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="logo-wrap">
+    <span class="logo-a" id="logo-a">MOONコミュニティ</span>
+    <span class="logo-b" id="logo-b">MOON Community</span>
+  </div>
+  <div class="nav-right">
+    <button class="btn-glass" onclick="cycleWeather()">
+      <span id="weather-icon">☀️</span><span id="weather-label" data-ja="晴れ" data-en="Clear">晴れ</span>
+    </button>
+    <button class="btn-glass" onclick="toggleLang()" id="lang-btn">EN</button>
+    <button class="btn-white" onclick="window.open('https://discord.gg/3sWGuxRxh2','_blank')" data-ja="参加する" data-en="Join">参加する</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-label">
+    <div class="hero-line"></div>
+    <span class="hero-tag">Discord Community</span>
+    <div class="hero-line"></div>
+  </div>
+  <h1 class="hero-h1 shimmer" id="hero-h1">MOON<br>コミュニティ</h1>
+  <p class="hero-sub" data-ja="信頼と実績が積み重なる、上質なDiscordコミュニティ" data-en="A premium Discord community built on trust and proven results." id="hero-sub">信頼と実績が積み重なる、上質なDiscordコミュニティ</p>
+  <div class="hero-btns">
+    <button class="btn-glass" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})" data-ja="詳細を見る" data-en="Learn More" id="hero-btn-detail">詳細を見る</button>
+    <button class="btn-white" style="padding:14px 32px;font-size:13px;" onclick="window.open('https://discord.gg/3sWGuxRxh2','_blank')" data-ja="参加する →" data-en="Join Now →" id="hero-btn-join">参加する →</button>
+  </div>
+  <div class="scroll-hint">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="sw reveal" id="sec-stats">
+  <div class="stats-grid">
+    <div class="card"><div class="stat-inner">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="opacity:.32;margin:0 auto 12px;display:block;"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+      <div class="stat-num" id="count-deals">0</div>
+      <div class="stat-lbl" data-ja="取引実績" data-en="Deals Done" id="lbl-deals">取引実績</div>
+    </div></div>
+    <div class="card"><div class="stat-inner">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="opacity:.32;margin:0 auto 12px;display:block;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      <div class="stat-num" id="count-members">0</div>
+      <div class="stat-lbl" data-ja="コミュニティメンバー" data-en="Members" id="lbl-members">コミュニティメンバー</div>
+    </div></div>
+    <div class="card"><div class="stat-inner">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="opacity:.32;margin:0 auto 12px;display:block;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+      <div class="stat-num" id="count-sat">—</div>
+      <div class="stat-lbl" data-ja="満足度" data-en="Satisfaction" id="lbl-sat">満足度</div>
+    </div></div>
+    <div class="card"><div class="stat-inner">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1" style="opacity:.32;margin:0 auto 12px;display:block;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <div class="stat-num" id="count-rating">—</div>
+      <div class="stat-lbl" data-ja="平均評価" data-en="Avg Rating" id="lbl-rating">平均評価</div>
+    </div></div>
+  </div>
+</section>
+
+<!-- SHOP -->
+<section class="sw reveal" id="shop">
+  <div class="sec-head">
+    <div class="sec-label">— Shop —</div>
+    <div class="sec-title" data-ja="ショップ紹介" data-en="Shop" id="shop-title">ショップ紹介</div>
+  </div>
+  <div class="card"><div style="padding:clamp(26px,5vw,50px);">
+    <div class="shop-layout">
+      <div class="shop-left">
+        <div class="shop-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span data-ja="🚧 開発中" data-en="🚧 In Development" id="shop-badge-txt">🚧 開発中</span>
+        </div>
+        <div class="shop-ttl" data-ja="現在、ショップを<br>鋭意開発中です。" data-en="Our shop is currently<br>under development." id="shop-ttl">現在、ショップを<br>鋭意開発中です。</div>
+        <p class="shop-desc" data-ja="MOONコミュニティのショップは現在開発中です。オープン次第、メンバーの皆さまにお知らせします。今後にご期待ください！" data-en="MOON Community's shop is currently under development. We will notify members as soon as it opens. Stay tuned!" id="shop-desc">MOONコミュニティのショップは現在開発中です。オープン次第、メンバーの皆さまにお知らせします。今後にご期待ください！</p>
+        <div class="shop-pts">
+          <div class="shop-pt"><div class="pdw"><div class="pd"></div></div><span class="pt-txt" data-ja="Script共有・配布" data-en="Script sharing & distribution" id="pt1">Script共有・配布</span></div>
+          <div class="shop-pt"><div class="pdw"><div class="pd"></div></div><span class="pt-txt" data-ja="安心できる取引環境" data-en="Safe and reliable trading" id="pt2">安心できる取引環境</span></div>
+          <div class="shop-pt"><div class="pdw"><div class="pd"></div></div><span class="pt-txt" data-ja="丁寧かつ迅速な対応" data-en="Prompt and courteous support" id="pt3">丁寧かつ迅速な対応</span></div>
+        </div>
+        <div class="ratio-box">
+          <div style="font-size:11px;letter-spacing:.18em;opacity:.36;margin-bottom:14px;text-transform:uppercase;" data-ja="チャンネル構成" data-en="Channel Breakdown" id="ratio-ttl">チャンネル構成</div>
+          <div class="ratio-row" style="flex-wrap:wrap;gap:10px 16px;">
+            <div style="display:flex;align-items:center;gap:7px;"><div class="rdot" style="background:rgba(255,255,255,.9);"></div><span class="rtxt">ショップ 30%</span></div>
+            <div style="display:flex;align-items:center;gap:7px;"><div class="rdot" style="background:rgba(255,255,255,.55);"></div><span class="rtxt">雑談 40%</span></div>
+            <div style="display:flex;align-items:center;gap:7px;"><div class="rdot" style="background:rgba(255,255,255,.32);"></div><span class="rtxt">共有 20%</span></div>
+            <div style="display:flex;align-items:center;gap:7px;"><div class="rdot" style="background:rgba(255,255,255,.15);"></div><span class="rtxt">情報共有 10%</span></div>
+          </div>
+          <div style="margin-top:10px;display:flex;height:7px;border-radius:100px;overflow:hidden;gap:2px;">
+            <div id="ratio-bar-shop" style="width:0%;background:rgba(255,255,255,.9);transition:width 1.3s cubic-bezier(.16,1,.3,1) .3s;border-radius:100px 0 0 100px;"></div>
+            <div id="ratio-bar-chat" style="width:0%;background:rgba(255,255,255,.55);transition:width 1.3s cubic-bezier(.16,1,.3,1) .5s;"></div>
+            <div id="ratio-bar-share" style="width:0%;background:rgba(255,255,255,.32);transition:width 1.3s cubic-bezier(.16,1,.3,1) .7s;"></div>
+            <div id="ratio-bar-info" style="width:0%;background:rgba(255,255,255,.15);transition:width 1.3s cubic-bezier(.16,1,.3,1) .9s;border-radius:0 100px 100px 0;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="shop-right">
+        <div class="shop-circle">
+          <div class="shop-num" style="font-size:clamp(18px,3vw,26px);opacity:.5;">Coming</div>
+          <div class="shop-sub-lbl">SOON</div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ADMIN -->
+<section class="sww reveal" id="sec-admin">
+  <div class="sec-head">
+    <div class="sec-label">— Team —</div>
+    <div class="sec-title" data-ja="管理者紹介" data-en="Meet the Team" id="admin-title">管理者紹介</div>
+  </div>
+  <div class="admin-grid">
+    <!-- amato / 運営 -->
+    <div class="card card-admin"><div class="admin-inner">
+      <div class="adm-av-wrap">
+        <div class="adm-av" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);">A</div>
+        <div class="adm-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></div>
+      </div>
+      <div class="adm-name">amato</div>
+      <span class="adm-role-tag" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:white;">👑 運営</span>
+      <p class="adm-desc">MOONコミュニティの運営。メンバーが安心して楽しめるサーバー作りを常に心がけています。何かあればお気軽にDMを！</p>
+    </div></div>
+    <!-- 不明 / サブオーナー -->
+    <div class="card card-admin"><div class="admin-inner">
+      <div class="adm-av-wrap">
+        <div class="adm-av" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);">?</div>
+        <div class="adm-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      </div>
+      <div class="adm-name">不明</div>
+      <span class="adm-role-tag" style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);color:white;">🛡️ サブオーナー</span>
+      <p class="adm-desc">サーバーの裏方として日々サポート中。困りごとは気軽に相談してください。</p>
+    </div></div>
+    <!-- まっくろ / 管理者 -->
+    <div class="card card-admin"><div class="admin-inner">
+      <div class="adm-av-wrap">
+        <div class="adm-av" style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.3);">ま</div>
+        <div class="adm-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      </div>
+      <div class="adm-name">まっくろ</div>
+      <span class="adm-role-tag" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:white;">⚙️ 管理者</span>
+      <p class="adm-desc">メンバー対応を担当しています。困ったことがあればいつでも声をかけてください！</p>
+    </div></div>
+    <!-- ryuryupad_PC / 管理者 -->
+    <div class="card card-admin"><div class="admin-inner">
+      <div class="adm-av-wrap">
+        <div class="adm-av" style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.3);">R</div>
+        <div class="adm-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      </div>
+      <div class="adm-name">ryuryupad_PC</div>
+      <span class="adm-role-tag" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:white;">⚙️ 管理者</span>
+      <p class="adm-desc">サーバーの管理・運営をサポートしています。気軽にDMしてください！</p>
+    </div></div>
+    <!-- ryuryupad_mohair / 管理者 -->
+    <div class="card card-admin"><div class="admin-inner">
+      <div class="adm-av-wrap">
+        <div class="adm-av" style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.3);">M</div>
+        <div class="adm-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      </div>
+      <div class="adm-name">ryuryupad_mohair</div>
+      <span class="adm-role-tag" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:white;">⚙️ 管理者</span>
+      <p class="adm-desc">サーバーの安全・快適な環境作りに尽力しています。何でも相談どうぞ！</p>
+    </div></div>
+    <!-- あっきー / 管理者 -->
+    <div class="card card-admin"><div class="admin-inner">
+      <div class="adm-av-wrap">
+        <div class="adm-av" style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.3);">あ</div>
+        <div class="adm-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      </div>
+      <div class="adm-name">あっきー<span style="font-size:12px;opacity:.5;font-weight:400;"> [akkii]</span></div>
+      <span class="adm-role-tag" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:white;">⚙️ 管理者</span>
+      <p class="adm-desc">メンバーが居心地よく過ごせるよう日々サポートしています！気軽に話しかけてね。</p>
+    </div></div>
+    <!-- 田中 / 管理者 -->
+    <div class="card card-admin"><div class="admin-inner">
+      <div class="adm-av-wrap">
+        <div class="adm-av" style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.3);">田</div>
+        <div class="adm-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      </div>
+      <div class="adm-name">田中</div>
+      <span class="adm-role-tag" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:white;">⚙️ 管理者</span>
+      <p class="adm-desc">主にメンバー対応とチャンネル管理を担当。疑問や不安はいつでも声をかけてください！</p>
+    </div></div>
+  </div>
+</section>
+
+<!-- RULES -->
+<section class="sww reveal" id="sec-rules">
+  <div class="sec-head">
+    <div class="sec-label">— Rules —</div>
+    <div class="sec-title" id="rules-main-title">🌕 サーバー利用規約 🌙</div>
+    <p style="font-size:13px;opacity:.45;margin-top:12px;line-height:1.8;" id="rules-main-sub">本規約はMOONコミュニティの秩序維持と安全確保のために定められています。<br>参加時点で本規約に同意したものとみなします。</p>
+  </div>
+  <div class="rules-grid">
+
+    <div class="card rule-inner">
+      <div class="rule-num">01</div>
+      <div class="rule-ttl">🌕 基本理念および目的</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">Scriptに関する情報共有・技術向上・健全な開発および交流を目的とします。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">外部サービスへの攻撃、対立の扇動、違法行為を前提とする発言・共有は禁止します。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">悪質と判断された場合、段階を問わず処分される場合があります。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">02</div>
+      <div class="rule-ttl">🌕 悪質Script・Executor悪用の禁止</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">他者のデータ盗用・PVP/FPS不正優位・荒らし専用・Executor不正利用を目的とするScriptの共有・要求・公開を禁止します。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">処分：警告 → 1h → 24h タイムアウト → キック → 悪質即BAN</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">03</div>
+      <div class="rule-ttl">🌕 虚偽情報・印象操作の禁止</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">根拠のない断定的発言・風評被害を生む投稿を禁止します。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">🍁琥珀HUB🍁への証拠なき断言は重大違反。曖昧な伝聞形式もデマとみなします。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">処分：1h → 24h タイムアウト → キック → 悪意ある拡散即BAN</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">04</div>
+      <div class="rule-ttl">🌕 荒らし行為の定義および処罰</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">短時間5回以上の連続投稿・意味を成さない文字列の連投・スタンプ10回以上の連続使用・チャンネル趣旨無視の投稿を荒らしと定義します。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">同一発言を3回連続投稿した場合、Botによる自動タイムアウトの対象となります。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">処分：注意 → 10分 → 1h → 24h タイムアウト → キック → 悪質永久BAN</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">05</div>
+      <div class="rule-ttl">🌕 個人情報および晒し行為の禁止</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">IPアドレス・住所・学校名・SNS本垢等の公開を禁止します。推測情報も対象となります。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">発覚次第即キック。重大性が高い場合は即BANとします。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">06</div>
+      <div class="rule-ttl">🌕 転載・改変・保護対象</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">🍁琥珀HUB🍁スクリプトの無断改変・再配布・難読化破壊・ソースコード漏洩は重大違反です。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">TikTok・ScriptBOX・他サーバーへの投稿は運営の許可を必ず取得してください。違反は原則即BANです。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">07</div>
+      <div class="rule-ttl">🌕 取引・販売・詐欺行為</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">販売・取引・有料加入は指定フォームを使用してください。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">フォーム外での詐欺行為・フォーム内であっても悪意が確認された場合は即BANとします。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">08</div>
+      <div class="rule-ttl">🌕 宣伝および同盟</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">無許可でのサーバー宣伝は禁止します。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">処分：削除＋警告 → 1h タイムアウト → キック。公式に有効なのは同盟関係のみです。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">09</div>
+      <div class="rule-ttl">🌕 Webhook・HTTPの保護</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">WebhookおよびHTTP機能の不正改造・妨害・悪用を禁止します。悪意が確認された場合、即BANとします。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">10</div>
+      <div class="rule-ttl">🌕 投票チャンネル規律</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">@everyone / @here の使用・投票に無関係な投稿・作成者以外の横槍発言・雑談や相談を禁止します。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">違反した場合、投票作成権限を剥奪します。スレッド機能の利用を推奨します。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">11</div>
+      <div class="rule-ttl">🌕 Bot使用規則</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">Botは専用チャンネルで使用してください。翻訳用途のみ例外とします。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">12</div>
+      <div class="rule-ttl">🌕 他サーバー連携・外部問題</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">他サーバーで重大違反が確認された場合、連携処分を行う場合があります。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">ルールを理解していない状態も処分対象となります。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">13</div>
+      <div class="rule-ttl">🌕 法的責任</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">警察沙汰となる可能性のある行為は禁止します。発生した場合、当サーバーは一切の責任を負いません。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">14</div>
+      <div class="rule-ttl">🌕 ロール管理</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">違反行為または危険と判断された場合、ロールは予告なく剥奪される可能性があります。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">15</div>
+      <div class="rule-ttl">🌕 全体メンション規制</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">許可されたロール以外での @everyone / @here の使用は禁止です。乱用は処分対象とします。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">16</div>
+      <div class="rule-ttl">🌕 新規参加者制限</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">荒らし対策として、参加直後に発言制限を設ける場合があります。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">17</div>
+      <div class="rule-ttl">🌕 自己責任原則</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">外部ツール利用に伴う損害について、当コミュニティは責任を負いません。</p></div>
+      </div>
+    </div>
+
+    <div class="card rule-inner">
+      <div class="rule-num">18</div>
+      <div class="rule-ttl">🌕 包括条項</div>
+      <div class="rule-items">
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">本規約に明記されていない行為であっても、運営が不適切と判断した場合は処分対象となります。</p></div>
+        <div class="rule-item"><div class="rbullet"></div><p class="rule-txt">悪意が明確な場合、段階を経ず即BANとすることがあります。</p></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="admin-note">
+    <div class="an-ttl">📌 管理者からのお願い</div>
+    <p class="an-txt">ルールに違反している人を見かけたら、直接反論せずに管理者へDMで報告してください。平和な環境作りにご協力をお願いします！</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sw reveal" id="sec-faq">
+  <div class="sec-head">
+    <div class="sec-label">— FAQ —</div>
+    <div class="sec-title" data-ja="よくある質問" data-en="FAQ" id="faq-title">よくある質問</div>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span data-ja="浮上（アクティブ）しても大丈夫ですか？" data-en="Is it okay to be active and chat freely?" id="fq1">浮上（アクティブ）しても大丈夫ですか？</span>
+        <span class="faq-arr">▼</span>
+      </button>
+      <div class="faq-a" data-ja="もちろんです！どんどん話しかけてください。雑談チャンネルはいつでも大歓迎です。自分のペースで参加していただければ嬉しいです。" data-en="Absolutely! Jump right in and chat whenever you like. The chat channel is always open. Just go at your own pace." id="fa1">もちろんです！どんどん話しかけてください。雑談チャンネルはいつでも大歓迎です。自分のペースで参加していただければ嬉しいです。</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span data-ja="みんな仲良さそうで話に入りづらいのですが…" data-en="Everyone seems close already — hard to break in?" id="fq2">みんな仲良さそうで話に入りづらいのですが…</span>
+        <span class="faq-arr">▼</span>
+      </button>
+      <div class="faq-a" data-ja="気にしなくて大丈夫です！常連メンバーは新しい人が来てくれると嬉しいと思っています。「はじめまして！」と一言投稿するだけで、自然に輪に入れますよ。管理者も積極的にサポートします。" data-en="Don't worry at all! The regulars love meeting new people. Just post a quick 'Hello!' and you'll naturally fit right in. The admins are here to help too." id="fa2">気にしなくて大丈夫です！常連メンバーは新しい人が来てくれると嬉しいと思っています。「はじめまして！」と一言投稿するだけで、自然に輪に入れますよ。管理者も積極的にサポートします。</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span data-ja="ショップの利用は初めてでも大丈夫ですか？" data-en="Can I use the shop as a first-timer?" id="fq3">ショップの利用は初めてでも大丈夫ですか？</span>
+        <span class="faq-arr">▼</span>
+      </button>
+      <div class="faq-a" data-ja="もちろん大丈夫です！40件以上の実績があり、初心者の方も丁寧にサポートします。疑問があれば管理者（いくすわ）に気軽に聞いてください。" data-en="Of course! With 40+ completed deals, we guide first-timers every step of the way. Just ask いくすわ (ikusuwa) if you have any questions." id="fa3">もちろん大丈夫です！40件以上の実績があり、初心者の方も丁寧にサポートします。疑問があれば管理者（いくすわ）に気軽に聞いてください。</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span data-ja="参加するのにお金はかかりますか？" data-en="Is there any cost to join?" id="fq4">参加するのにお金はかかりますか？</span>
+        <span class="faq-arr">▼</span>
+      </button>
+      <div class="faq-a" data-ja="サーバーへの参加は完全無料です。ショップのサービスを利用する際は別途ご案内があります。" data-en="Joining the server is completely free. Shop services are explained separately when you use them." id="fa4">サーバーへの参加は完全無料です。ショップのサービスを利用する際は別途ご案内があります。</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span data-ja="トラブルが起きたらどうすればいいですか？" data-en="What should I do if there's a problem?" id="fq5">トラブルが起きたらどうすればいいですか？</span>
+        <span class="faq-arr">▼</span>
+      </button>
+      <div class="faq-a" data-ja="直接相手に反論せず、管理者（ゆずぴー・じつねこ・いくすわ）のいずれかにDMで報告してください。迅速に対応します。" data-en="Don't confront the person directly — DM one of the admins (ゆずぴー, じつねこ, or いくすわ) and we'll handle it quickly." id="fa5">直接相手に反論せず、管理者（ゆずぴー・じつねこ・いくすわ）のいずれかにDMで報告してください。迅速に対応します。</div>
+    </div>
+  </div>
+</section>
+
+<!-- BGM -->
+<div class="bgm-wrap reveal" id="sec-bgm">
+  <div class="card bgm-card">
+    <div class="bgm-sec-lbl">🎵 BGM</div>
+    <div class="bgm-main-lbl" data-ja="管理者が選んだ曲" data-en="Tracks picked by the admins" id="bgm-lbl">管理者が選んだ曲</div>
+    <div class="bgm-sub-lbl" data-ja="好きな曲を選んでSpotifyで聴こう" data-en="Pick a track and listen on Spotify" id="bgm-sub">好きな曲を選んでSpotifyで聴こう</div>
+    <div class="bgm-tracks">
+      <div class="bgm-track active" onclick="selectTrack(0)">
+        <div class="bgm-dot"></div>
+        <div>
+          <div class="bgm-track-name">ryuryupad_PC</div>
+          <div class="bgm-track-sub">Spotifyで再生</div>
+        </div>
+      </div>
+      <div class="bgm-track" onclick="selectTrack(1)">
+        <div class="bgm-dot"></div>
+        <div>
+          <div class="bgm-track-name">ryuryupad_mohair</div>
+          <div class="bgm-track-sub">Spotifyで再生</div>
+        </div>
+      </div>
+    </div>
+    <div class="bgm-player-wrap">
+      <iframe id="spotify-frame"
+        src="https://open.spotify.com/embed/track/5Ls7xSu1mqG13LRrXBHD8q?utm_source=generator"
+        style="border-radius:12px" width="100%" height="352" frameBorder="0" allowfullscreen=""
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="sw reveal" id="sec-cta" style="padding-bottom:110px;">
+  <div class="card cta-card"><div class="cta-inner">
+    <div class="cta-label-txt">Join Us</div>
+    <div class="cta-ttl" data-ja="今すぐ参加しよう" data-en="Join Us Today" id="cta-ttl">今すぐ参加しよう</div>
+    <p class="cta-desc" data-ja="MOONコミュニティで、信頼できる仲間と繋がろう。<br>40件以上の実績があなたを待っています。" data-en="Connect with trusted members in MOON Community.<br>40+ deals are waiting for you." id="cta-desc">MOONコミュニティで、信頼できる仲間と繋がろう。<br>40件以上の実績があなたを待っています。</p>
+    <button class="btn-white" style="padding:17px 46px;font-size:14px;font-weight:900;" onclick="window.open('https://discord.gg/3sWGuxRxh2','_blank')" data-ja="参加する →" data-en="Join Now →" id="cta-btn">参加する →</button>
+  </div></div>
+</section>
+
+<footer>
+  <p class="footer-txt" data-ja="© 2025 MOONコミュニティ — All Rights Reserved" data-en="© 2025 MOON Community — All Rights Reserved" id="footer-txt">© 2025 MOONコミュニティ — All Rights Reserved</p>
+</footer>
+
+<script>
+// ── Language switcher ─────────────────────────────────────────────
+let currentLang = 'ja';
+
+function toggleLang() {
+  currentLang = currentLang === 'ja' ? 'en' : 'ja';
+  document.getElementById('lang-btn').textContent = currentLang === 'ja' ? 'EN' : '日本語';
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('[data-ja][data-en]').forEach(el => {
+    const val = el.getAttribute('data-' + currentLang);
+    if (val !== null) el.innerHTML = val;
+  });
+  const h1 = document.getElementById('hero-h1');
+  h1.innerHTML = currentLang === 'ja' ? 'MOON<br>コミュニティ' : 'MOON<br>Community';
+  document.getElementById('logo-a').textContent = currentLang === 'ja' ? 'MOONコミュニティ' : 'MOON Community';
+  document.getElementById('logo-b').textContent = currentLang === 'ja' ? 'MOON Community' : 'MOON Community ✦';
+  // Rules section title & subtitle
+  const rt = document.getElementById('rules-main-title');
+  const rs = document.getElementById('rules-main-sub');
+  if(rt) rt.textContent = currentLang === 'ja' ? '🌕 サーバー利用規約 🌙' : '🌕 Server Rules 🌙';
+  if(rs) rs.innerHTML = currentLang === 'ja'
+    ? '本規約はMOONコミュニティの秩序維持と安全確保のために定められています。<br>参加時点で本規約に同意したものとみなします。'
+    : 'These rules are established to maintain order, safety, and stability within the MOON Community.<br>By participating, you agree to all regulations stated below.';
+  // Rules cards EN/JA swap
+  const rulesData = {
+    ja: [
+      ['🌕 基本理念および目的', 'Scriptに関する情報共有・技術向上・健全な開発および交流を目的とします。', '外部サービスへの攻撃、対立の扇動、違法行為を前提とする発言・共有は禁止します。', '悪質と判断された場合、段階を問わず処分される場合があります。'],
+      ['🌕 悪質Script・Executor悪用の禁止', '他者のデータ盗用・PVP/FPS不正優位・荒らし専用・Executor不正利用を目的とするScriptの共有・要求・公開を禁止します。', '処分：警告 → 1h → 24h タイムアウト → キック → 悪質即BAN'],
+      ['🌕 虚偽情報・印象操作の禁止', '根拠のない断定的発言・風評被害を生む投稿を禁止します。', '🍁琥珀HUB🍁への証拠なき断言は重大違反。曖昧な伝聞形式もデマとみなします。', '処分：1h → 24h タイムアウト → キック → 悪意ある拡散即BAN'],
+      ['🌕 荒らし行為の定義および処罰', '短時間5回以上の連続投稿・意味を成さない文字列の連投・スタンプ10回以上の連続使用・チャンネル趣旨無視の投稿を荒らしと定義します。', '同一発言を3回連続投稿した場合、Botによる自動タイムアウトの対象となります。', '処分：注意 → 10分 → 1h → 24h タイムアウト → キック → 悪質永久BAN'],
+      ['🌕 個人情報および晒し行為の禁止', 'IPアドレス・住所・学校名・SNS本垢等の公開を禁止します。推測情報も対象となります。', '発覚次第即キック。重大性が高い場合は即BANとします。'],
+      ['🌕 転載・改変・保護対象', '🍁琥珀HUB🍁スクリプトの無断改変・再配布・難読化破壊・ソースコード漏洩は重大違反です。', 'TikTok・ScriptBOX・他サーバーへの投稿は運営の許可を必ず取得してください。違反は原則即BANです。'],
+      ['🌕 取引・販売・詐欺行為', '販売・取引・有料加入は指定フォームを使用してください。', 'フォーム外での詐欺行為・フォーム内であっても悪意が確認された場合は即BANとします。'],
+      ['🌕 宣伝および同盟', '無許可でのサーバー宣伝は禁止します。', '処分：削除＋警告 → 1h タイムアウト → キック。公式に有効なのは同盟関係のみです。'],
+      ['🌕 Webhook・HTTPの保護', 'WebhookおよびHTTP機能の不正改造・妨害・悪用を禁止します。悪意が確認された場合、即BANとします。'],
+      ['🌕 投票チャンネル規律', '@everyone / @here の使用・投票に無関係な投稿・作成者以外の横槍発言・雑談や相談を禁止します。', '違反した場合、投票作成権限を剥奪します。スレッド機能の利用を推奨します。'],
+      ['🌕 Bot使用規則', 'Botは専用チャンネルで使用してください。翻訳用途のみ例外とします。'],
+      ['🌕 他サーバー連携・外部問題', '他サーバーで重大違反が確認された場合、連携処分を行う場合があります。', 'ルールを理解していない状態も処分対象となります。'],
+      ['🌕 法的責任', '警察沙汰となる可能性のある行為は禁止します。発生した場合、当サーバーは一切の責任を負いません。'],
+      ['🌕 ロール管理', '違反行為または危険と判断された場合、ロールは予告なく剥奪される可能性があります。'],
+      ['🌕 全体メンション規制', '許可されたロール以外での @everyone / @here の使用は禁止です。乱用は処分対象とします。'],
+      ['🌕 新規参加者制限', '荒らし対策として、参加直後に発言制限を設ける場合があります。'],
+      ['🌕 自己責任原則', '外部ツール利用に伴う損害について、当コミュニティは責任を負いません。'],
+      ['🌕 包括条項', '本規約に明記されていない行為であっても、運営が不適切と判断した場合は処分対象となります。', '悪意が明確な場合、段階を経ず即BANとすることがあります。'],
+    ],
+    en: [
+      ['🌕 Purpose & Core Principles', 'This community exists for script-related knowledge sharing, development, testing, and constructive interaction.', 'Attacks on external services, inciting conflict, and supporting illegal activities are strictly prohibited.', 'Severe violations may result in immediate disciplinary action.'],
+      ['🌕 Malicious Scripts & Executor Abuse', 'Sharing, requesting, or publishing scripts designed to steal data, gain unfair PVP/FPS advantage, harass others, or abuse Executors is prohibited.', 'Punishment: Warning → 1h → 24h timeout → Kick → Severe: Immediate BAN'],
+      ['🌕 False Information & Defamation', 'Spreading unverified claims or harmful rumors is prohibited.', 'Claims such as "KohakuHUB🍁 contains an IP logger" without evidence are major violations. Indirect rumors causing misunderstanding also count.', 'Punishment: 1h → 24h timeout → Kick → Malicious defamation: Immediate BAN'],
+      ['🌕 Harassment & Spam', '5+ rapid messages, meaningless text spam, excessive mentions, 10+ sticker spam, and off-topic posts are defined as disruptive behavior.', 'Posting identical messages 3 times consecutively may trigger automatic bot timeout.', 'Punishment: Warning → 10min → 1h → 24h timeout → Kick → Severe: Permanent BAN'],
+      ['🌕 Privacy Protection', 'Publishing IP addresses, real names, school names, private social accounts, etc. is strictly forbidden. Inferred information also applies.', 'Immediate Kick upon confirmation. Severe cases: Immediate BAN.'],
+      ['🌕 Unauthorized Redistribution & Protection', 'Unauthorized modification or redistribution of 🍁KohakuHUB🍁 scripts, deobfuscation, or source leakage are major violations.', 'Posting to TikTok, ScriptBOX, or other servers requires prior staff approval. Violations result in Immediate BAN.'],
+      ['🌕 Transactions & Fraud', 'All sales, trades, and paid services must use the designated form.', 'Fraud outside the form or confirmed malicious intent inside the form results in Immediate BAN.'],
+      ['🌕 Advertising & Alliances', 'Unauthorized server advertising is prohibited.', 'Punishment: Removal + Warning → 1h timeout → Kick. Only officially approved alliances are recognized.'],
+      ['🌕 Webhook & HTTP Protection', 'Unauthorized modification, interference, or abuse of Webhook/HTTP systems is strictly forbidden. Malicious intent: Immediate BAN.'],
+      ['🌕 Voting Channel Regulations', '@everyone / @here mentions, unrelated posts, interfering comments by non-authors, and general discussion are prohibited in voting channels.', 'Violations may result in voting privilege removal. Thread usage is recommended.'],
+      ['🌕 Bot Usage', 'Bots must be used in designated channels. Translation use is the only exception.'],
+      ['🌕 Cross-Server Enforcement', 'Major violations in partner servers may result in coordinated disciplinary action.', 'Failure to understand rules does not exempt members from punishment.'],
+      ['🌕 Legal Responsibility', 'Any action that may involve law enforcement is prohibited. The community bears no responsibility for such actions.'],
+      ['🌕 Role Management', 'Roles may be removed without notice if a user is deemed risky or in violation.'],
+      ['🌕 Mass Mention Restrictions', 'Only authorized roles may use @everyone / @here. Abuse will result in disciplinary action.'],
+      ['🌕 New Member Restrictions', 'Temporary speaking restrictions may apply to new members for anti-raid purposes.'],
+      ['🌕 User Responsibility', 'Use of external tools is at your own risk. The community is not liable for external damages.'],
+      ['🌕 General Clause', 'Any behavior not explicitly stated but deemed inappropriate by staff may result in punishment.', 'Clear malicious intent may result in immediate BAN without warning.'],
+    ]
+  };
+  const cards = document.querySelectorAll('#sec-rules .card.rule-inner');
+  const data = rulesData[currentLang];
+  cards.forEach((card, i) => {
+    if (!data[i]) return;
+    const ttl = card.querySelector('.rule-ttl');
+    const txts = card.querySelectorAll('.rule-txt');
+    if (ttl) ttl.textContent = data[i][0];
+    txts.forEach((t, j) => { if (data[i][j+1]) t.textContent = data[i][j+1]; });
+  });
+  updateWeatherLabel();
+}
+
+// ── Intersection Observer ─────────────────────────────────────────
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('revealed'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+const shopObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const s = document.getElementById('ratio-bar-shop');
+      const c = document.getElementById('ratio-bar-chat');
+      const sh = document.getElementById('ratio-bar-share');
+      const i = document.getElementById('ratio-bar-info');
+      if(s){ s.style.width='30%'; }
+      if(c){ c.style.width='40%'; }
+      if(sh){ sh.style.width='20%'; }
+      if(i){ i.style.width='10%'; }
+    }
+  });
+}, { threshold: 0.2 });
+shopObs.observe(document.getElementById('shop'));
+
+// ── Count-up animation ────────────────────────────────────────────
+let countsDone = false;
+function animateCount(id, target, suffix, duration) {
+  const el = document.getElementById(id);
+  let start = 0;
+  const step = Math.ceil(target / (duration / 16));
+  const timer = setInterval(() => {
+    start = Math.min(start + step, target);
+    el.textContent = start + suffix;
+    if (start >= target) clearInterval(timer);
+  }, 16);
+}
+const statsObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting && !countsDone) {
+      countsDone = true;
+      animateCount('count-deals', 0, '', 600);
+      animateCount('count-members', 14, '', 1400);
+      // 満足度・評価は「未定」固定なのでアニメーションしない
+    }
+  });
+}, { threshold: 0.3 });
+statsObs.observe(document.getElementById('sec-stats'));
+
+// ── FAQ ───────────────────────────────────────────────────────────
+function toggleFaq(btn) {
+  const answer = btn.nextElementSibling;
+  const arrow = btn.querySelector('.faq-arr');
+  const isOpen = answer.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.faq-arr').forEach(a => a.classList.remove('open'));
+  if (!isOpen) { answer.classList.add('open'); arrow.classList.add('open'); }
+}
+
+// ── BGM ───────────────────────────────────────────────────────────
+const trackIds = ['5Ls7xSu1mqG13LRrXBHD8q', '7IBqHkoP94VrgYKVns4eNz'];
+function selectTrack(idx) {
+  document.querySelectorAll('.bgm-track').forEach((t, i) => t.classList.toggle('active', i === idx));
+  document.getElementById('spotify-frame').src =
+    'https://open.spotify.com/embed/track/' + trackIds[idx] + '?utm_source=generator';
+}
+
+// ── Weather ───────────────────────────────────────────────────────
+let weatherMode = 'none';
+const weatherStates = ['none', 'rain', 'snow'];
+const weatherData = {
+  none: { icon: '☀️', ja: '晴れ', en: 'Clear' },
+  rain: { icon: '🌧️', ja: '雨',   en: 'Rain'  },
+  snow: { icon: '❄️', ja: '雪',   en: 'Snow'  },
+};
+
+function updateWeatherLabel() {
+  const d = weatherData[weatherMode];
+  document.getElementById('weather-icon').textContent = d.icon;
+  document.getElementById('weather-label').textContent = d[currentLang];
+}
+
+function cycleWeather() {
+  const idx = weatherStates.indexOf(weatherMode);
+  weatherMode = weatherStates[(idx + 1) % weatherStates.length];
+  updateWeatherLabel();
+  initWeather();
+}
+
+const wCanvas = document.getElementById('weather-canvas');
+const wCtx = wCanvas.getContext('2d');
+let wAF = null, wPts = [];
+
+function resizeWCanvas() { wCanvas.width = window.innerWidth; wCanvas.height = window.innerHeight; }
+resizeWCanvas();
+window.addEventListener('resize', resizeWCanvas);
+
+function initWeather() {
+  cancelAnimationFrame(wAF);
+  wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
+  wPts = [];
+  if (weatherMode === 'none') return;
+  if (weatherMode === 'rain') {
+    for (let i = 0; i < 130; i++) wPts.push({
+      x: Math.random() * wCanvas.width, y: Math.random() * wCanvas.height,
+      len: Math.random() * 16 + 8, speed: Math.random() * 7 + 10,
+      op: Math.random() * 0.3 + 0.1, w: Math.random() * 0.7 + 0.3
+    });
+  } else {
+    for (let i = 0; i < 90; i++) wPts.push({
+      x: Math.random() * wCanvas.width, y: Math.random() * wCanvas.height,
+      r: Math.random() * 3 + 1, speed: Math.random() * 1.1 + 0.4,
+      drift: Math.random() * 0.5 - 0.25, op: Math.random() * 0.45 + 0.15,
+      wob: Math.random() * Math.PI * 2
+    });
+  }
+  drawWeather();
+}
+
+function drawWeather() {
+  wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
+  if (weatherMode === 'rain') {
+    wPts.forEach(p => {
+      wCtx.beginPath(); wCtx.moveTo(p.x, p.y); wCtx.lineTo(p.x - p.len * 0.14, p.y + p.len);
+      wCtx.strokeStyle = 'rgba(180,220,255,' + p.op + ')'; wCtx.lineWidth = p.w; wCtx.stroke();
+      p.y += p.speed; p.x -= p.speed * 0.07;
+      if (p.y > wCanvas.height) { p.y = -p.len; p.x = Math.random() * wCanvas.width; }
+    });
+  } else if (weatherMode === 'snow') {
+    wPts.forEach(p => {
+      p.wob += 0.018;
+      wCtx.beginPath(); wCtx.arc(p.x + Math.sin(p.wob) * 1.8, p.y, p.r, 0, Math.PI * 2);
+      wCtx.fillStyle = 'rgba(255,255,255,' + p.op + ')'; wCtx.fill();
+      p.y += p.speed; p.x += p.drift;
+      if (p.y > wCanvas.height) { p.y = -p.r; p.x = Math.random() * wCanvas.width; }
+      if (p.x > wCanvas.width) p.x = 0; if (p.x < 0) p.x = wCanvas.width;
+    });
+  }
+  wAF = requestAnimationFrame(drawWeather);
+}
+</script>
+</body>
+</html>
