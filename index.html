@@ -367,7 +367,7 @@ footer{text-align:center;padding:28px;border-top:1px solid rgba(255,255,255,.05)
         <div class="adm-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
       </div>
       <div class="adm-name">田中</div>
-      <span class="adm-role-tag" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:white;">⚙️ 管理者</span>
+      <span class="adm-role-tag" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:white;">🔨サポーター</span>
       <p class="adm-desc">主にメンバー対応とチャンネル管理を担当。疑問や不安はいつでも声をかけてください！</p>
     </div></div>
   </div>
@@ -818,7 +818,7 @@ const statsObs = new IntersectionObserver(entries => {
 
         // アニメーション発火
         animateCount('count-members', totalMembers, '', 1400); // メンバー数
-        animateCount('count-deals', 40, '+', 800);            // 取引実績（数値は任意で調整しろ）
+        animateCount('count-deals', 0, '+', 800);            // 取引実績（数値は任意で調整しろ）
 
       } catch (err) {
         console.error("Discord Sync Error:", err);
