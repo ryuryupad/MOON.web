@@ -785,30 +785,54 @@ const shopObs = new IntersectionObserver(entries => {
   });
 }, { threshold: 0.2 });
 shopObs.observe(document.getElementById('shop'));
-
-// ── Count-up animation ────────────────────────────────────────────
+// ── Count-up animation with Discord Sync ──────────────────────────
 let countsDone = false;
+const DISCORD_INVITE_CODE = 'shBfHQBqeP'; // ryuryupadのサーバー招待コード
+
 function animateCount(id, target, suffix, duration) {
   const el = document.getElementById(id);
+  if (!el) return;
   let start = 0;
-  const step = Math.ceil(target / (duration / 16));
+  // 60FPS(16ms)想定でステップ計算
+  const step = Math.max(1, Math.ceil(target / (duration / 16)));
   const timer = setInterval(() => {
     start = Math.min(start + step, target);
     el.textContent = start + suffix;
     if (start >= target) clearInterval(timer);
   }, 16);
 }
+
 const statsObs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
+  entries.forEach(async e => {
+    // セクションが画面に入り、かつ未実行の場合
     if (e.isIntersecting && !countsDone) {
       countsDone = true;
-      animateCount('count-deals', 0, '', 600);
-      animateCount('count-members', 14, '', 1400);
-      // 満足度・評価は「未定」固定なのでアニメーションしない
+
+      try {
+        // APIからリアルタイムデータを取得
+        const response = await fetch(`https://discord.com/api/v9/invites/${DISCORD_INVITE_CODE}?with_counts=true`);
+        const data = await response.json();
+        
+        // 取得した総メンバー数（取れなかったら14をデフォルトに）
+        const totalMembers = data.approximate_member_count || 14;
+
+        // アニメーション発火
+        animateCount('count-members', totalMembers, '', 1400); // メンバー数
+        animateCount('count-deals', 40, '+', 800);            // 取引実績（数値は任意で調整しろ）
+
+      } catch (err) {
+        console.error("Discord Sync Error:", err);
+        // エラー時のフォールバック
+        animateCount('count-members', 14, '', 1400);
+        animateCount('count-deals', 40, '+', 800);
+      }
     }
   });
 }, { threshold: 0.3 });
-statsObs.observe(document.getElementById('sec-stats'));
+
+// HTMLの id="sec-stats" を監視
+const targetSection = document.getElementById('sec-stats');
+if (targetSection) statsObs.observe(targetSection);
 
 // ── FAQ ───────────────────────────────────────────────────────────
 function toggleFaq(btn) {
